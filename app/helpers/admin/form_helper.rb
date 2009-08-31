@@ -16,17 +16,17 @@ module Admin::FormHelper
           next
         end
         case value
-        when :belongs_to:      html << typus_belongs_to_field(key)
-        when :boolean:         html << typus_boolean_field(key)
-        when :date:            html << typus_date_field(key, options)
-        when :datetime:        html << typus_datetime_field(key, options)
-        when :file:            html << typus_file_field(key)
-        when :password:        html << typus_password_field(key)
-        when :selector:        html << typus_selector_field(key)
-        when :text:            html << typus_text_field(key)
-        when :tiny_mce:        html << typus_tiny_mce_field(key)
-        when :time:            html << typus_time_field(key, options)
-        when :tree:            html << typus_tree_field(key)
+        when :belongs_to then      html << typus_belongs_to_field(key)
+        when :boolean then         html << typus_boolean_field(key)
+        when :date then            html << typus_date_field(key, options)
+        when :datetime then        html << typus_datetime_field(key, options)
+        when :file then            html << typus_file_field(key)
+        when :password then        html << typus_password_field(key)
+        when :selector then        html << typus_selector_field(key)
+        when :text then            html << typus_text_field(key)
+        when :tiny_mce then        html << typus_tiny_mce_field(key)
+        when :time then            html << typus_time_field(key, options)
+        when :tree then            html << typus_tree_field(key)
         else
           html << typus_string_field(key)
         end
@@ -93,15 +93,25 @@ module Admin::FormHelper
     HTML
   end
 
+  # WEI: Added image preview.
   def typus_file_field(attribute)
-
     attribute_display = attribute.split('_file_name').first
-
+    unless @item.send(attribute).blank?
+      if attachment = @item.send(attribute_display)
+        if (@item.send("#{attribute_display}_content_type") =~ /^image\/.+/) and (attachment.styles.member?(:thumbnail) or attachment.styles.member?(:edit))
+          style = attachment.styles.member?(:thumbnail) ? :thumbnail : :edit
+          preview = image_tag attachment.url(style)
+        else
+          preview = link_to @item.send(attribute), attachment.url
+        end
+      end
+    end
     <<-HTML
-<li><label for="item_#{attribute}">#{_(attribute_display.humanize)}</label>
-#{file_field :item, attribute.split("_file_name").first, :disabled => attribute_disabled?(attribute)}</li>
+    <li><label for="item_#{attribute}">#{_(attribute_display.humanize)}</label>
+      #{file_field :item, attribute.split("_file_name").first, :disabled => attribute_disabled?(attribute)}
+      #{preview}
+    </li>
     HTML
-
   end
 
   def typus_password_field(attribute)
@@ -225,7 +235,9 @@ module Admin::FormHelper
       association = reflection.macro
       foreign_key = reflection.through_reflection ? reflection.primary_key_name.pluralize : reflection.primary_key_name
 
-      link_options = { :controller => "admin/#{field}", 
+      #WEI: Changed link to use type name rather than field:
+      #WEI: link_options = { :controller => "admin/#{field}", 
+      link_options = { :controller => "admin/#{model_to_relate_as_resource.pluralize}", 
                        :action => 'new', 
                        :back_to => "#{@back_to}##{field}", 
                        :resource => @resource[:self].singularize, 

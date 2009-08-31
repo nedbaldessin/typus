@@ -1,16 +1,3 @@
-class ActionController::Routing::RouteSet
-
-  def load_routes_with_typus!
-    lib_path = File.dirname(__FILE__)
-    typus_routes = File.join(lib_path, *%w[ .. config routes_hack.rb ])
-    add_configuration_file(typus_routes) unless configuration_files.include?(typus_routes)
-    load_routes_without_typus!
-  end
-
-  alias_method_chain :load_routes!, :typus
-
-end
-
 module Typus
 
   class << self
@@ -80,8 +67,14 @@ module Typus
       File.exist?("#{Rails.root}/vendor/plugins/typus")
     end
 
-    # Enable application. This is used at boot time.
-    def enable
+    def boot!
+
+      # return unless File.exists?("#{Rails.root}/config/initializers/typus.rb") || testing?
+      return if %w( script/generate script/destroy ).include?($0)
+
+      if testing?
+        Typus::Configuration.options[:config_folder] = 'vendor/plugins/typus/test/config/working'
+      end
 
       # Ruby Extensions
       require 'typus/hash'
@@ -94,22 +87,24 @@ module Typus
 
       # Load translation files from the plugin or the gem.
       if plugin?
-        I18n.load_path += Dir[File.join(Typus.root, 'config', 'locales', '**', '*.{rb,yml}')]
+        I18n.load_path += Dir[File.join(root, 'config', 'locales', '**', '*.{rb,yml}')]
       else
         Gem.path.each { |g| I18n.load_path += Dir[File.join("#{g}/gems/*typus-#{version}/config/locales/**/*.{rb,yml}")] }
       end
 
       # Require the test/models on when testing.
-      require File.dirname(__FILE__) + '/../test/models' if Typus.testing?
+      require File.dirname(__FILE__) + '/../test/models' if testing?
 
       # Rails Extensions.
       require 'typus/active_record'
+      require 'typus/extensions/routes'
 
       # Mixins.
       require 'typus/authentication'
       require 'typus/format'
       require 'typus/generator'
       require 'typus/locale'
+      require 'typus/preview'
       require 'typus/reloader'
       require 'typus/quick_edit'
       require 'typus/user'
@@ -117,6 +112,9 @@ module Typus
       # Vendor.
       require 'vendor/active_record'
       require 'vendor/paginator'
+
+      # Run controllers generator ...
+      generator unless testing? || Rails.env.production?
 
     end
 

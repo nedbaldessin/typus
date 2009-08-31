@@ -56,6 +56,55 @@ mailing list.
 Tell everybody about Typus, tell your friends and colleagues about 
 Typus and blog about Typus.
 
+== Fancyzoom for assets
+
+This feature is a work in progress. It currently works if the attached file is 
+named asset and only previews images.
+
+    # db/migrate/create_photos.rb
+
+    class CreatePhotos < ActiveRecord::Migration
+
+      def self.up
+        create_table :photos do |t|
+          t.string :asset_file_name
+          t.string :asset_content_type
+          t.integer :asset_file_size
+          t.datetime :asset_updated_at
+        end
+      end
+
+      def self.down
+        drop_table :photos
+      end
+
+    end
+
+    # app/models/photo.rb
+
+    class Photo < ActiveRecord::Base
+      has_attached_file :asset, :styles => { :typus => "692x461" }
+    end
+
+    # app/views/admin/photos/_index.html.erb
+
+    <%- content_for :javascripts do -%>
+
+      <%= javascript_include_tag 'admin/prototype' %>
+      <%= javascript_include_tag 'admin/scriptaculous' %>
+      <%= javascript_include_tag 'admin/fancyzoom' %>
+
+      <script type="text/javascript">
+        FancyZoomBox.directory = '/images/admin/fancyzoom';
+        $(document).observe('dom:loaded', function() {
+          <%- @items.each do |item| -%>
+            new FancyZoom('<%= item.to_dom %>');
+          <%- end -%>
+        });
+      </script>
+
+    <%- end -%>
+
 == Contributors
 
 - Laia Gargallo (Lover and tea provider) http://azotacalles.net
@@ -68,10 +117,14 @@ Typus and blog about Typus.
 - Erik Tigerholm (Code) http://github.com/eriktigerholm
 - George Guimarães (Portuguese translation and code) http://github.com/georgeguimaraes
 - José Valim (Code) http://github.com/josevalim
-- Luqman Amjad (Code) http://github.com/snake
+- Luqman Amjad (Code) http://github.com/luqman
 - Alexey Noskov (Russian translation and code) http://github.com/alno
 - Andres Gutierres (Bugfixes & feedback) http://github.com/andresgutgon
 - Komzák Nándor (Code, bugfixes & feedback) http://github.com/rubymood
+- Michael Grunewalder (German translation) http://michael.grunewalder.com
+- Tim Harvey (Code) http://www.timharvey.net/ 
+- Ned Baldessin (Code) http://github.com/nedbaldessin
+- Robert Rouse (Code) - Ruby 1.9 compatibility fixes.
 
 == Acknowledgments
 

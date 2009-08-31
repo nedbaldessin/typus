@@ -24,9 +24,9 @@ class Admin::TableHelperTest < ActiveSupport::TestCase
     output = typus_table_header(TypusUser, fields)
     expected = <<-HTML
 <tr>
-<th><a href="http://test.host/admin/typus_users?order_by=email"><div class="">Email</div></a></th>
-<th><a href="http://test.host/admin/typus_users?order_by=role"><div class="">Role</div></a></th>
-<th><a href="http://test.host/admin/typus_users?order_by=status"><div class="">Status</div></a></th>
+<th><a href="http://test.host/admin/typus_users?order_by=email">Email </a></th>
+<th><a href="http://test.host/admin/typus_users?order_by=role">Role </a></th>
+<th><a href="http://test.host/admin/typus_users?order_by=status">Status </a></th>
 <th>&nbsp;</th>
 </tr>
     HTML
@@ -48,9 +48,9 @@ class Admin::TableHelperTest < ActiveSupport::TestCase
     output = typus_table_header(TypusUser, fields)
     expected = <<-HTML
 <tr>
-<th><a href="http://test.host/admin/typus_users?order_by=email&search=admin"><div class="">Email</div></a></th>
-<th><a href="http://test.host/admin/typus_users?order_by=role&search=admin"><div class="">Role</div></a></th>
-<th><a href="http://test.host/admin/typus_users?order_by=status&search=admin"><div class="">Status</div></a></th>
+<th><a href="http://test.host/admin/typus_users?order_by=email&search=admin">Email </a></th>
+<th><a href="http://test.host/admin/typus_users?order_by=role&search=admin">Role </a></th>
+<th><a href="http://test.host/admin/typus_users?order_by=status&search=admin">Status </a></th>
 <th>&nbsp;</th>
 </tr>
     HTML
@@ -72,9 +72,9 @@ class Admin::TableHelperTest < ActiveSupport::TestCase
     output = typus_table_header(TypusUser, fields)
     expected = <<-HTML
 <tr>
-<th><a href="http://test.host/admin/typus_users?order_by=email"><div class="">Email</div></a></th>
-<th><a href="http://test.host/admin/typus_users?order_by=role"><div class="">Role</div></a></th>
-<th><a href="http://test.host/admin/typus_users?order_by=status"><div class="">Status</div></a></th>
+<th><a href="http://test.host/admin/typus_users?order_by=email">Email </a></th>
+<th><a href="http://test.host/admin/typus_users?order_by=role">Role </a></th>
+<th><a href="http://test.host/admin/typus_users?order_by=status">Status </a></th>
 </tr>
     HTML
 
@@ -95,9 +95,9 @@ class Admin::TableHelperTest < ActiveSupport::TestCase
     output = typus_table_header(TypusUser, fields)
     expected = <<-HTML
 <tr>
-<th><a href="http://test.host/admin/typus_users?order_by=email&search=admin"><div class="">Email</div></a></th>
-<th><a href="http://test.host/admin/typus_users?order_by=role&search=admin"><div class="">Role</div></a></th>
-<th><a href="http://test.host/admin/typus_users?order_by=status&search=admin"><div class="">Status</div></a></th>
+<th><a href="http://test.host/admin/typus_users?order_by=email&search=admin">Email </a></th>
+<th><a href="http://test.host/admin/typus_users?order_by=role&search=admin">Role </a></th>
+<th><a href="http://test.host/admin/typus_users?order_by=status&search=admin">Status </a></th>
 </tr>
     HTML
 
@@ -156,7 +156,7 @@ class Admin::TableHelperTest < ActiveSupport::TestCase
     post = posts(:published)
     output = typus_table_string_field(:title, post, :title)
     expected = <<-HTML
-<td><a href="http://test.host/admin/posts/edit/#{post.id}">#{post.title}</a></td>
+<td>#{post.title}</td>
     HTML
 
     assert_equal expected, output
@@ -206,7 +206,7 @@ class Admin::TableHelperTest < ActiveSupport::TestCase
 
     output = typus_table_datetime_field(:created_at, post, :created_at)
     expected = <<-HTML
-<td><a href="http://test.host/admin/posts/edit/#{post.id}">#{post.created_at.strftime('%m/%y')}</a></td>
+<td>#{post.created_at.strftime('%m/%y')}</td>
     HTML
 
     assert_equal expected, output
@@ -215,7 +215,7 @@ class Admin::TableHelperTest < ActiveSupport::TestCase
 
   def test_typus_table_boolean_field
 
-    options = { :icon_on_boolean => false, :toggle => false }
+    options = { :toggle => false }
     Typus::Configuration.stubs(:options).returns(options)
 
     post = posts(:published)
