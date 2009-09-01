@@ -93,25 +93,27 @@ module Admin::FormHelper
     HTML
   end
 
-  # WEI: Added image preview.
+  # Optimize
   def typus_file_field(attribute)
-    attribute_display = attribute.split('_file_name').first
+
+    attachment = attribute.split('_file_name').first
+
     unless @item.send(attribute).blank?
-      if attachment = @item.send(attribute_display)
-        if (@item.send("#{attribute_display}_content_type") =~ /^image\/.+/) and (attachment.styles.member?(:thumbnail) or attachment.styles.member?(:edit))
-          style = attachment.styles.member?(:thumbnail) ? :thumbnail : :edit
-          preview = image_tag attachment.url(style)
-        else
-          preview = link_to @item.send(attribute), attachment.url
-        end
-      end
+      item = @item.send(attachment)
+      preview = if @item.send("#{attachment}_content_type") =~ /^image\/.+/ && item.styles.member?(:typus_thumbnail)
+                    image_tag item.url(:typus_thumbnail)
+                  else
+                    link_to @item.send(attribute), item.url
+                  end
     end
+
     <<-HTML
-    <li><label for="item_#{attribute}">#{_(attribute_display.humanize)}</label>
-      #{file_field :item, attribute.split("_file_name").first, :disabled => attribute_disabled?(attribute)}
-      #{preview}
-    </li>
+<li><label for="item_#{attribute}">#{_(attachment.humanize)}</label>
+#{file_field :item, attachment, :disabled => attribute_disabled?(attribute)}
+#{preview}
+</li>
     HTML
+
   end
 
   def typus_password_field(attribute)
@@ -235,8 +237,6 @@ module Admin::FormHelper
       association = reflection.macro
       foreign_key = reflection.through_reflection ? reflection.primary_key_name.pluralize : reflection.primary_key_name
 
-      #WEI: Changed link to use type name rather than field:
-      #WEI: link_options = { :controller => "admin/#{field}", 
       link_options = { :controller => "admin/#{model_to_relate_as_resource.pluralize}", 
                        :action => 'new', 
                        :back_to => "#{@back_to}##{field}", 

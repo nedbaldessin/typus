@@ -235,8 +235,10 @@ module Typus
         # Sidebar filters:
         #
         # - Booleans: true, false
-        # - Datetime: today, past_7_days, this_month, this_year
+        # - Datetime: today, last_few_days, last_7_days, last_30_days
         # - Integer & String: *_id and "selectors" (p.ej. category_id)
+        #
+        # today last_few_days last_7_days last_30_days
         #
         case filter_type
         when :boolean
@@ -245,9 +247,9 @@ module Typus
         when :datetime
           interval = case value
                      when 'today' then         Time.new.midnight..Time.new.midnight.tomorrow
-                     when 'past_7_days' then   6.days.ago.midnight..Time.new.midnight.tomorrow
-                     when 'this_month' then    Time.new.midnight.last_month..Time.new.midnight.tomorrow
-                     when 'this_year' then     Time.new.midnight.last_year..Time.new.midnight.tomorrow
+                     when 'last_few_days' then 3.days.ago.midnight..Time.new.midnight.tomorrow
+                     when 'last_7_days' then   6.days.ago.midnight..Time.new.midnight.tomorrow
+                     when 'last_30_days' then  Time.new.midnight.last_month..Time.new.midnight.tomorrow
                      end
           condition = ["#{key} BETWEEN ? AND ?", interval.first.to_s(:db), interval.last.to_s(:db)]
           conditions = merge_conditions(conditions, condition)
@@ -264,6 +266,10 @@ module Typus
 
       return conditions, joins
 
+    end
+
+    def typus_user_id?
+      columns.map { |u| u.name }.include?(Typus.user_fk)
     end
 
   end
@@ -297,6 +303,14 @@ module Typus
 
     def typus_name
       respond_to?(:name) ? name : "#{self.class}##{id}"
+    end
+
+    def typus_user_id?
+      self.class.typus_user_id?
+    end
+
+    def owned_by?(user)
+      send(Typus.user_fk) == user.id
     end
 
   end

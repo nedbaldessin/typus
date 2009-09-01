@@ -31,14 +31,21 @@ module Admin::TableHelper
           else
             html << typus_table_string_field(key, item, link_options)
           end
-
         end
 
-      action = item.class.typus_options_for(:default_action_on_item)
-      content = link_to _(action.capitalize), :controller => "admin/#{item.class.name.tableize}", :action => action, :id => item.id
-      html << <<-HTML
+        action = if item.typus_user_id? && !@current_user.is_root?
+                   # If there's a typus_user_id column on the table and logged user is not root ...
+                   item.owned_by?(@current_user) ? 'edit' : 'show'
+                 elsif !@current_user.can_perform?(model, 'edit')
+                   'show'
+                 else
+                   item.class.typus_options_for(:default_action_on_item)
+                 end
+
+        content = link_to _(action.capitalize), :controller => "admin/#{item.class.name.tableize}", :action => action, :id => item.id
+        html << <<-HTML
 <td width="10px">#{content}</td>
-      HTML
+        HTML
 
       ##
       # This controls the action to perform. If we are on a model list we 
@@ -149,10 +156,20 @@ module Admin::TableHelper
   end
 
   def typus_table_file_field(attribute, item, link_options = {})
-    <<-HTML
+
+    attachment = attribute.split('_file_name').first
+
+    if item.asset.styles.member?(:typus_preview) && item.send("#{attachment}_content_type") =~ /^image\/.+/
+      <<-HTML
 <td><a href="##{item.to_dom(:suffix => 'zoom')}" id="#{item.to_dom}" title="Click to preview">#{item.send(attribute)}</a></td>
-<div id="#{item.to_dom(:suffix => 'zoom')}">#{item.typus_preview}</div>
-    HTML
+<div id=\"#{item.to_dom(:suffix => 'zoom')}\">#{item.typus_preview}</div>
+      HTML
+    else
+      <<-HTML
+<td>#{link_to item.send(attribute), item.asset.url}</td>
+      HTML
+    end
+
   end
 
   def typus_table_tree_field(attribute, item)
