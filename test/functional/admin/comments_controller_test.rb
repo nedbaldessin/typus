@@ -1,8 +1,7 @@
 require 'test/helper'
 
-##
 # Test template extensions rendering and things related to views.
-#
+
 class Admin::CommentsControllerTest < ActionController::TestCase
 
   def setup
@@ -103,6 +102,8 @@ class Admin::CommentsControllerTest < ActionController::TestCase
   end
 
   def test_should_generate_csv
+
+    return if !defined?(FasterCSV)
 
     expected = <<-RAW
 Email,Post

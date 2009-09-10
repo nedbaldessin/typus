@@ -28,18 +28,14 @@ module Admin::SidebarHelper
       end
     end
 
-    # OPTIMIZE
     case params[:action]
     when 'show'
-      if @current_user.can_perform?(@resource[:class], 'update')
-        if @item.typus_user_id?
-          if @item.owned_by?(@current_user)
-            items << (link_to _("Edit entry"), :action => 'edit', :id => @item.id)
-          end
-        else
-          items << (link_to _("Edit entry"), :action => 'edit', :id => @item.id)
-        end
-      end
+      condition = if @resource[:class].typus_user_id? && !@current_user.is_root?
+                    @item.owned_by?(@current_user)
+                  else
+                    @current_user.can_perform?(@resource[:class], 'destroy')
+                  end
+      items << (link_to _("Edit entry"), :action => 'edit', :id => @item.id) if condition
     end
 
     @resource[:class].typus_actions_for(params[:action]).each do |action|
@@ -89,12 +85,32 @@ module Admin::SidebarHelper
 
   end
 
-  def previous_and_next
+  def previous_and_next(klass = @resource[:class])
+
     return [] unless %w( edit show update ).include?(params[:action])
+
+    # Verify ownership of record to define the kind of action which can be 
+    # performed on the record.
+
     returning(Array.new) do |items|
-      items << (link_to _("Next"), params.merge(:id => @next.id)) if @next
-      items << (link_to _("Previous"), params.merge(:id => @previous.id)) if @previous
+      if @next
+        action = if klass.typus_user_id? && !@current_user.is_root?
+                   @next.owned_by?(@current_user) ? 'edit' : 'show'
+                 else
+                   !@current_user.can_perform?(klass, 'edit') ? 'show' : params[:action]
+                 end
+        items << (link_to _("Next"), params.merge(:action => action, :id => @next.id))
+      end
+      if @previous
+        action = if klass.typus_user_id? && !@current_user.is_root?
+                   @previous.owned_by?(@current_user) ? 'edit' : 'show'
+                 else
+                   !@current_user.can_perform?(klass, 'edit') ? 'show' : params[:action]
+                 end
+        items << (link_to _("Previous"), params.merge(:action => action, :id => @previous.id))
+      end
     end
+
   end
 
   def search
@@ -178,7 +194,7 @@ function surfto_#{model_pluralized}(form) {
 <!-- /Embedded JS -->
 <form class="form" action="#"><p>
   <select name="#{model_pluralized}" onChange="surfto_#{model_pluralized}(this.form)">
-    <option value="#{url_for params_without_filter}">#{_("filter by")} #{_(model.typus_human_name)}</option>
+    <option value="#{url_for params_without_filter}">#{_("Filter by")} #{_(model.typus_human_name)}</option>
     #{items.join("\n")}
   </select>
 </p></form>

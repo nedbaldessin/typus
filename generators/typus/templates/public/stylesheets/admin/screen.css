@@ -4,8 +4,9 @@ html { background: #000; height: 100%; margin-bottom: 1px; }
 body { color: #000; font-family: "Lucida Grande", Helvetica, Arial, sans-serif; font-size: 75%; }
 label { display: block; font-weight: bold; margin-bottom: 5px; }
 strong { font-weight: bold; }
-dt { float: left; font-weight: bold; width: 200px; }
-dd { margin: 0 0 0 220px; }
+dl { margin: 14px 0 20px 0; }
+dt { font-weight: bold; margin: 0 0 5px 0; }
+dd { font-size: 18px; margin: 0 0 15px 0; }
 
 /* @end */
 
@@ -78,7 +79,7 @@ a.on { color: #333; font-weight: bold; text-decoration: underline; }
   #content ul { margin: 0 1.5em; }
   #content li { list-style: square; line-height: 20px; }
   #content ul li { list-style: square; }
-  #content p { margin: 1em 0; }
+  #content p { margin: 0 0 1em 0; }
   #content p a { text-decoration: underline; }
   #content p a:hover { color: #408BB6; }
 
@@ -373,5 +374,6 @@ input#search { border: 1px solid #999; font-size: 1.2em; padding: 3px; }
 
 .sprite { background: url(/images/admin/ui-icons.png) no-repeat; text-indent: -1000px; }
 .trash { background-position: -177px -97px; height: 15px; width: 15px; }
+.unrelate { background-position: -145px -129px; height: 15px; width: 15px; }
 
 /* @end */

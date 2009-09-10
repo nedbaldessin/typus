@@ -278,8 +278,8 @@ module Typus
 
     def previous_and_next(condition = {}, klass = self.class)
 
-      previous_conditions = "#{klass.primary_key} < #{id}"
-      next_conditions = "#{klass.primary_key} > #{id}"
+      previous_conditions = "#{klass.primary_key} < #{quote_value(id)}"
+      next_conditions = "#{klass.primary_key} > #{quote_value(id)}"
 
       if !condition.empty?
         conditions, joins = klass.build_conditions(condition)
@@ -287,13 +287,15 @@ module Typus
         next_conditions += " AND #{conditions}"
       end
 
+      select = !klass.typus_user_id? ? klass.primary_key : "#{klass.primary_key}, #{Typus.user_fk}"
+
       previous_ = klass.find :first, 
-                             :select => [klass.primary_key], 
+                             :select => select, 
                              :order => "#{klass.primary_key} DESC", 
                              :conditions => previous_conditions
 
       next_ = klass.find :first, 
-                         :select => [klass.primary_key], 
+                         :select => select, 
                          :order => "#{klass.primary_key} ASC", 
                          :conditions => next_conditions
 
@@ -303,10 +305,6 @@ module Typus
 
     def typus_name
       respond_to?(:name) ? name : "#{self.class}##{id}"
-    end
-
-    def typus_user_id?
-      self.class.typus_user_id?
     end
 
     def owned_by?(user)

@@ -16,6 +16,7 @@ class ActiveRecordTest < ActiveSupport::TestCase
                        [:token, :string], 
                        [:salt, :string], 
                        [:crypted_password, :string], 
+                       [:preferences, :string], 
                        [:created_at, :datetime], 
                        [:updated_at, :datetime]]
     assert_equal expected_fields.map { |i| i.first }, TypusUser.model_fields.keys
@@ -376,6 +377,11 @@ class ActiveRecordTest < ActiveSupport::TestCase
    assert_nil Post.typus_template('created_at')
    assert_nil Post.typus_template('unknown')
 
+  end
+
+  def test_should_verify_typus_user_id
+    assert Post.typus_user_id?
+    assert !TypusUser.typus_user_id?
   end
 
 end

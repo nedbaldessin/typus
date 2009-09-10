@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{typus}
-  s.version = "0.9.22"
+  s.version = "0.9.27"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Francesc Esplugas"]
-  s.date = %q{2009-08-26}
+  s.date = %q{2009-09-09}
   s.description = %q{Effortless backend interface for Ruby on Rails applications. (Admin scaffold generator.)}
   s.email = %q{francesc@intraducibles.com}
   s.extra_rdoc_files = [
@@ -46,11 +46,12 @@ Gem::Specification.new do |s|
      "app/views/typus/sign_in.html.erb",
      "app/views/typus/sign_up.html.erb",
      "app/views/typus_mailer/reset_password_link.erb",
-     "config/locales/typus/de.yml",
-     "config/locales/typus/es.yml",
-     "config/locales/typus/language.yml.template",
-     "config/locales/typus/pt-BR.yml",
-     "config/locales/typus/ru.yml",
+     "config/locales/de.yml",
+     "config/locales/es.yml",
+     "config/locales/fr.yml",
+     "config/locales/language.yml.template",
+     "config/locales/pt-BR.yml",
+     "config/locales/ru.yml",
      "config/routes.rb",
      "generators/typus/templates/config/initializers/typus.rb",
      "generators/typus/templates/config/typus/README",
@@ -94,6 +95,8 @@ Gem::Specification.new do |s|
      "generators/typus_update_schema_to_01/templates/config/typus.yml",
      "generators/typus_update_schema_to_01/templates/migration.rb",
      "generators/typus_update_schema_to_01/typus_update_schema_to_01_generator.rb",
+     "generators/typus_update_schema_to_02/templates/migration.rb",
+     "generators/typus_update_schema_to_02/typus_update_schema_to_02_generator.rb",
      "lib/typus.rb",
      "lib/typus/active_record.rb",
      "lib/typus/authentication.rb",
@@ -105,6 +108,7 @@ Gem::Specification.new do |s|
      "lib/typus/hash.rb",
      "lib/typus/locale.rb",
      "lib/typus/object.rb",
+     "lib/typus/preferences.rb",
      "lib/typus/preview.rb",
      "lib/typus/quick_edit.rb",
      "lib/typus/reloader.rb",
@@ -116,6 +120,7 @@ Gem::Specification.new do |s|
      "lib/typus/user.rb",
      "lib/vendor/active_record.rb",
      "lib/vendor/paginator.rb",
+     "lib/vendor/rss_parser.rb",
      "rails/init.rb",
      "tasks/typus_tasks.rake",
      "test/config/broken/application.yml",

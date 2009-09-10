@@ -27,10 +27,6 @@ module Typus
 
       @current_user = Typus.user_class.find(session[:typus_user_id])
 
-      unless @current_user.respond_to?(:role)
-        raise _("Run 'script/generate typus_update_schema_to_01 -f && rake db:migrate' to update database schema.")
-      end
-
       unless Typus::Configuration.roles.keys.include?(@current_user.role)
         raise _("Role does no longer exists.")
       end
@@ -90,7 +86,7 @@ module Typus
 
       if message
         flash[:notice] = message
-        redirect_to :back rescue redirect_to admin_dashboard_path
+        redirect_to request.referer || admin_dashboard_path
       end
 
     end
@@ -103,21 +99,18 @@ module Typus
                 when 'index', 'show'
                   _("{{current_user_role}} can't display items.", 
                     :current_user_role => @current_user.role.capitalize)
-                when 'edit', 'update', 'position', 'toggle', 'relate', 'unrelate'
                 when 'destroy'
                   _("{{current_user_role}} can't delete this item.", 
                     :current_user_role => @current_user.role.capitalize)
                 else
-                  _("{{current_user_role}} can't perform action ({{action}}).", 
+                  _("{{current_user_role}} can't perform action. ({{action}})", 
                     :current_user_role => @current_user.role.capitalize, 
                     :action => params[:action])
                 end
 
       unless @current_user.can_perform?(@resource[:class], params[:action])
-        flash[:notice] = message || _("{{current_user_role}} can't perform action. ({{action}}).", 
-                                      :current_user_role => @current_user.role.capitalize, 
-                                      :action => params[:action])
-        redirect_to :back rescue redirect_to admin_dashboard_path
+        flash[:notice] = message
+        redirect_to request.referer || admin_dashboard_path
       end
 
     end
@@ -133,7 +126,7 @@ module Typus
                            :current_user_role => @current_user.role.capitalize, 
                            :action => action, 
                            :controller => controller.humanize.downcase)
-        redirect_to :back rescue redirect_to admin_dashboard_path
+        redirect_to request.referer || admin_dashboard_path
       end
     end
 
