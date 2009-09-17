@@ -11,11 +11,12 @@ module Typus
     end
 
     def locales
-      Typus::Configuration.options[:locales]
-    end
-
-    def default_locale
-      locales.map(&:last).first
+      [ [ "German", 'de' ],
+        [ "English", 'en' ], 
+        [ "Español", 'es' ],
+        [ "Français", 'fr' ],
+        [ "Portuguese", 'pt-BR' ], 
+        [ "Russian", 'ru' ] ]
     end
 
     def applications
@@ -59,12 +60,12 @@ module Typus
       Typus::Configuration.options[:user_fk]
     end
 
-    def testing?
-      Rails.env.test? && Dir.pwd == "#{Rails.root}/vendor/plugins/typus"
+    def relationship
+      Typus::Configuration.options[:relationship]
     end
 
-    def plugin?
-      File.exist?("#{Rails.root}/vendor/plugins/typus")
+    def testing?
+      Rails.env.test? && Dir.pwd == "#{Rails.root}/vendor/plugins/typus"
     end
 
     def boot!
@@ -85,13 +86,6 @@ module Typus
       Typus::Configuration.config!
       Typus::Configuration.roles!
 
-      # Load translation files from the plugin or the gem.
-      if plugin?
-        I18n.load_path += Dir[File.join(root, 'config', 'locales', '**', '*.{rb,yml}')]
-      else
-        Gem.path.each { |g| I18n.load_path += Dir[File.join("#{g}/gems/*typus-#{version}/config/locales/**/*.{rb,yml}")] }
-      end
-
       # Require the test/models on when testing.
       require File.dirname(__FILE__) + '/../test/models' if testing?
 
@@ -103,8 +97,8 @@ module Typus
       require 'typus/authentication'
       require 'typus/format'
       require 'typus/generator'
-      require 'typus/locale'
       require 'typus/preview'
+      require 'typus/preferences'
       require 'typus/reloader'
       require 'typus/quick_edit'
       require 'typus/user'
@@ -112,6 +106,7 @@ module Typus
       # Vendor.
       require 'vendor/active_record'
       require 'vendor/paginator'
+      require 'vendor/rss_parser'
 
       # Run controllers generator ...
       generator unless testing? || Rails.env.production?

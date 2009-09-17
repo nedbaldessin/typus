@@ -5,20 +5,21 @@ module Typus
     # Default options which can be overwritten from the initializer.
     typus_options = { :app_name => 'Typus', 
                       :config_folder => 'config/typus', 
+                      :default_locale => :en, 
                       :email => 'admin@example.com', 
-                      :image_preview_size => 'typus', 
-                      :locales => [ [ "English", :en ] ], 
+                      :file_preview => :typus_preview, 
+                      :file_thumbnail => :typus_thumbnail, 
                       :recover_password => false, 
+                      :relationship => 'typus_users', 
                       :root => 'admin', 
                       :ssl => false, 
-                      :templates_folder => 'admin/templates',
                       :user_class_name => 'TypusUser', 
                       :user_fk => 'typus_user_id' }
 
     # Default options which can be overwritten from the initializer.
     model_options = { :default_action_on_item => 'edit', 
                       :end_year => nil,
-                      :form_rows => 10, 
+                      :form_rows => 15, 
                       :index_after_save => false, 
                       :minute_step => 5, 
                       :nil => 'nil', 

@@ -47,7 +47,7 @@ Notes on the application demo:
 
 == Installing
 
-Install from GitHub the latest version which it's compatible with Rails 2.3.2.
+Install from GitHub the latest version which it's compatible with Rails 2.3.4.
 
     $ script/plugin install git://github.com/fesplugas/typus.git
 
@@ -72,13 +72,12 @@ Hire us to work on your next project. We build large and small websites.
 Contribute your patches to the community & support people on the 
 mailing list.
 
-Tell everybody about Typus, tell your friends and colleagues about 
-Typus and blog about Typus.
+Tell everybody about *Typus*, tell your friends and colleagues about 
+*Typus* and blog about *Typus*.
 
-== Fancyzoom for assets
+== Fancybox for assets
 
-This feature is a work in progress. It currently works if the attached file is 
-named asset and only previews images.
+You can preview assets using Fancybox[http://fancybox.net/example].
 
     # db/migrate/create_photos.rb
 
@@ -101,28 +100,44 @@ named asset and only previews images.
 
     # app/models/photo.rb
 
+    ##
+    # Styles are predefined but you can use your own by defining them
+    # on `config/initializers/typus.rb`.
+    #
+    #     Typus::Configuration.options[:file_preview] = :my_preview
+    #     Typus::Configuration.options[:file_thumbnail] = :my_thumbnail
+    ##
     class Photo < ActiveRecord::Base
-      has_attached_file :asset, :styles => { :typus => "692x461" }
+      has_attached_file :asset, :styles => { :typus_preview => "692x461", :typus_thumbnail => "100x100" }
     end
 
     # app/views/admin/photos/_index.html.erb
 
+    <%- content_for :stylesheets do -%>
+      <%= stylesheet_link_tag 'admin/jquery.fancybox', :media => 'screen' %>
+    <%- end -%>
+
     <%- content_for :javascripts do -%>
 
-      <%= javascript_include_tag 'admin/prototype' %>
-      <%= javascript_include_tag 'admin/scriptaculous' %>
-      <%= javascript_include_tag 'admin/fancyzoom' %>
+      <%= javascript_include_tag 'admin/jquery-1.3.2.min' %>
+      <%= javascript_include_tag 'admin/jquery.fancybox-1.2.1.min' %>
 
-      <script type="text/javascript">
-        FancyZoomBox.directory = '/images/admin/fancyzoom';
-        $(document).observe('dom:loaded', function() {
+      <script type="text/javascript" charset="utf-8">
+        $(document).ready(function() {
           <%- @items.each do |item| -%>
-            new FancyZoom('<%= item.to_dom %>');
+            $("#<%= item.to_dom %>").fancybox();
           <%- end -%>
         });
       </script>
 
     <%- end -%>
+
+== Using Typus as a Gem?
+
+If you are using *Typus* as a gem add the following line at the end of the 
+<tt>Rakefile</tt> on the root of your Rails application.
+
+    Dir["#{RAILS_ROOT}/vendor/gems/*/**/tasks/**/*.rake"].sort.each { |ext| load ext }
 
 == Contributors
 
@@ -142,13 +157,15 @@ named asset and only previews images.
 - Komzák Nándor (Code, bugfixes & feedback) http://github.com/rubymood
 - Michael Grunewalder (German translation) http://michael.grunewalder.com
 - Tim Harvey (Code) http://www.timharvey.net/ 
-- Ned Baldessin (Code) http://github.com/nedbaldessin
+- Ned Baldessin (French translation and code) http://github.com/nedbaldessin
 - Robert Rouse (Code) - Ruby 1.9 compatibility fixes.
 
 == Acknowledgments
 
 - *Typus* uses "Paginator" by Bruce Williams http://codefluency.com.
-- *Typus* has been inspired by "Django Admin" http://www.djangoproject.com.
+- *Typus* has been inspired by "Django Admin" http://djangoproject.com.
+- *Typus* uses http://fancybox.net.
+- *Typus* uses UI icons from http://jqueryui.com.
 
 Copyright (c) 2007-2009 Francesc Esplugas Marti, released under the 
 MIT license

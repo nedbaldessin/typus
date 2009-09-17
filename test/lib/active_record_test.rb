@@ -16,6 +16,7 @@ class ActiveRecordTest < ActiveSupport::TestCase
                        [:token, :string], 
                        [:salt, :string], 
                        [:crypted_password, :string], 
+                       [:preferences, :string], 
                        [:created_at, :datetime], 
                        [:updated_at, :datetime]]
     assert_equal expected_fields.map { |i| i.first }, TypusUser.model_fields.keys
@@ -159,17 +160,17 @@ class ActiveRecordTest < ActiveSupport::TestCase
 
   def test_should_return_options_for_post_and_page
 
-    assert_equal 10, Post.typus_options_for(:form_rows)
-    assert_equal 10, Post.typus_options_for('form_rows')
+    assert_equal 15, Post.typus_options_for(:form_rows)
+    assert_equal 15, Post.typus_options_for('form_rows')
 
     assert_equal 25, Page.typus_options_for(:form_rows)
     assert_equal 25, Page.typus_options_for('form_rows')
 
-    assert_equal 10, Asset.typus_options_for(:form_rows)
-    assert_equal 10, Asset.typus_options_for('form_rows')
+    assert_equal 15, Asset.typus_options_for(:form_rows)
+    assert_equal 15, Asset.typus_options_for('form_rows')
 
-    assert_equal 10, TypusUser.typus_options_for(:form_rows)
-    assert_equal 10, TypusUser.typus_options_for('form_rows')
+    assert_equal 15, TypusUser.typus_options_for(:form_rows)
+    assert_equal 15, TypusUser.typus_options_for('form_rows')
 
     assert Page.typus_options_for(:on_header)
     assert !TypusUser.typus_options_for(:on_header)
@@ -368,14 +369,9 @@ class ActiveRecordTest < ActiveSupport::TestCase
 
   end
 
-  def test_should_verify_typus_template_is_working_properly
-
-   assert_equal 'datepicker', Post.typus_template('published_at')
-   assert_equal 'datepicker', Post.typus_template(:published_at)
-
-   assert_nil Post.typus_template('created_at')
-   assert_nil Post.typus_template('unknown')
-
+  def test_should_verify_typus_user_id
+    assert Post.typus_user_id?
+    assert !TypusUser.typus_user_id?
   end
 
 end

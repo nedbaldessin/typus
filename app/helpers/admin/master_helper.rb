@@ -6,7 +6,7 @@ module Admin::MasterHelper
   include Admin::FormHelper
   include Admin::TableHelper
 
-  def display_link_to_previous # (_params = params)
+  def display_link_to_previous
 
     options = {}
     options[:resource_from] = @resource[:class].typus_human_name
@@ -99,6 +99,12 @@ module Admin::MasterHelper
       html << yield(pager.last.number).to_s if options[:always_show_anchors] and not last == pager.last.number
     end
 
+  end
+
+  def asset_is_image?(item, asset)
+    item.respond_to?("#{asset}_content_type") && 
+    item.send("#{asset}_content_type") =~ /^image\/.+/ || 
+    %w(jpg gif png).include?(item.send("#{asset}_file_name")[-3,3])
   end
 
 end

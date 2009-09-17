@@ -75,7 +75,7 @@ module TypusHelper
 
         html << <<-HTML
 <tr class="#{cycle('even', 'odd')}">
-<td>#{link_to _(resource.humanize), resource_path}</td>
+<td>#{link_to _(resource.tableize.humanize), resource_path}</td>
 <td align="right" style="vertical-align: bottom;"></td>
 </tr>
         HTML
@@ -173,26 +173,6 @@ module TypusHelper
 <div id="flash" class="#{flash_type}">
   <p>#{message[flash_type]}</p>
 </div>
-    HTML
-
-  end
-
-  def typus_message(message, html_class = 'notice')
-    <<-HTML
-<div id="flash" class="#{html_class}">
-  <p>#{message}</p>
-</div>
-    HTML
-  end
-
-  def locales(uri = admin_set_locale_path)
-
-    return unless Typus.locales.many?
-
-    locale_links = Typus.locales.map { |l| "<a href=\"#{uri}?locale=#{l.last}\">#{l.first.downcase}</a>" }
-
-    <<-HTML
-<p>#{_("Set language to")} #{locale_links.join(', ')}.</p>
     HTML
 
   end

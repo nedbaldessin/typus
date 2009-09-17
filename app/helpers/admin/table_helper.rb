@@ -33,7 +33,7 @@ module Admin::TableHelper
           end
         end
 
-        action = if item.typus_user_id? && !@current_user.is_root?
+        action = if model.typus_user_id? && !@current_user.is_root?
                    # If there's a typus_user_id column on the table and logged user is not root ...
                    item.owned_by?(@current_user) ? 'edit' : 'show'
                  elsif !@current_user.can_perform?(model, 'edit')
@@ -47,45 +47,56 @@ module Admin::TableHelper
 <td width="10px">#{content}</td>
         HTML
 
-      ##
-      # This controls the action to perform. If we are on a model list we 
-      # will remove the entry, but if we inside a model we will remove the 
-      # relationship between the models.
-      #
-      # Only shown is the user can destroy items.
-      #
-      if @current_user.can_perform?(model, 'delete')
+        ##
+        # This controls the action to perform. If we are on a model list we 
+        # will remove the entry, but if we inside a model we will remove the 
+        # relationship between the models.
+        #
+        # Only shown is the user can destroy/unrelate items.
+        #
 
         trash = "<div class=\"sprite trash\">Trash</div>"
+        unrelate = "<div class=\"sprite unrelate\">Unrelate</div>"
 
         case params[:action]
         when 'index'
-          perform = link_to trash, { :action => 'destroy', 
-                                     :id => item.id }, 
+          condition = if model.typus_user_id? && !@current_user.is_root?
+                        item.owned_by?(@current_user)
+                      else
+                        @current_user.can_perform?(model, 'destroy')
+                      end
+          perform = link_to trash, { :action => 'destroy', :id => item.id }, 
+                                     :title => _("Remove"), 
                                      :confirm => _("Remove entry?"), 
-                                     :method => :delete
-        else
-          perform = link_to trash, { :action => 'unrelate', 
-                                     :id => params[:id], 
-                                     :association => association, 
-                                     :resource => model, 
-                                     :resource_id => item.id }, 
-                                     :confirm => _("Unrelate {{unrelate_model}} from {{unrelate_model_from}}?", 
-                                     :unrelate_model => model.typus_human_name, 
-                                     :unrelate_model_from => @resource[:class].typus_human_name)
+                                     :method => :delete if condition
+        when 'edit'
+          # If we are editing content, we can relate and unrelate always!
+          perform = link_to unrelate, { :action => 'unrelate', :id => params[:id], :resource => model, :resource_id => item.id }, 
+                                        :title => _("Unrelate"), 
+                                        :confirm => _("Unrelate {{unrelate_model}} from {{unrelate_model_from}}?", 
+                                        :unrelate_model => model.typus_human_name, 
+                                        :unrelate_model_from => @resource[:class].typus_human_name)
+        when 'show'
+          # If we are showing content, we only can relate and unrelate if we are 
+          # the owners of the owner record.
+          # If the owner record doesn't have a foreign key (Typus.user_fk) we look
+          # each item to verify the ownership.
+          condition = if @resource[:class].typus_user_id? && !@current_user.is_root?
+                        @item.owned_by?(@current_user)
+                      end
+          perform = link_to unrelate, { :action => 'unrelate', :id => params[:id], :resource => model, :resource_id => item.id }, 
+                                        :title => _("Unrelate"), 
+                                        :confirm => _("Unrelate {{unrelate_model}} from {{unrelate_model_from}}?", 
+                                        :unrelate_model => model.typus_human_name, 
+                                        :unrelate_model_from => @resource[:class].typus_human_name) if condition
         end
 
         html << <<-HTML
 <td width="10px">#{perform}</td>
+</tr>
         HTML
 
       end
-
-      html << <<-HTML
-</tr>
-      HTML
-
-    end
 
       html << "</table>"
 
@@ -158,15 +169,15 @@ module Admin::TableHelper
   def typus_table_file_field(attribute, item, link_options = {})
 
     attachment = attribute.split('_file_name').first
+    file_preview = Typus::Configuration.options[:file_preview]
 
-    if item.asset.styles.member?(:typus_preview) && item.send("#{attachment}_content_type") =~ /^image\/.+/
+    if item.send(attachment).styles.member?(file_preview) && asset_is_image?(item, attachment)
       <<-HTML
-<td><a href="##{item.to_dom(:suffix => 'zoom')}" id="#{item.to_dom}" title="Click to preview">#{item.send(attribute)}</a></td>
-<div id=\"#{item.to_dom(:suffix => 'zoom')}\">#{item.typus_preview}</div>
+<td><a id="#{item.to_dom}" href="#{item.send(attachment).url(file_preview)}" title="#{item.typus_name}">#{item.send(attribute)}</a></td>
       HTML
     else
       <<-HTML
-<td>#{link_to item.send(attribute), item.asset.url}</td>
+<td>#{link_to item.send(attribute), item.send(attachment).url}</td>
       HTML
     end
 
