@@ -86,13 +86,14 @@ fr:
   "If you didn't request a password update, you can ignore this message": "Si vous n'avez pas demandé à mettre à jour votre mot de passe, vous pouvez ignorer ce message"
   "Reset password": "Renouveler le mot de passe"
   "Add new": "Ajouter nouveau"
-  "Do you want to cancel it?": "Voulez-vous annuler?"
+  "Do you want to cancel it?": "Voulez-vous annuler ?"
   "Click here": "Cliquer ici"
-  "Are you sure you want to leave this page?": "Êtes-vous certain de vouloir quitter cette page?"
+  "Are you sure you want to leave this page?": "Êtes-vous certain de vouloir quitter cette page ?"
   "If you have made any changes to the fields without clicking the Save/Update entry button, your changes will be lost": "Si vous avez effectué des modifications sans cliquer sur le bouton Enregistrer ou Mettre à jour, ces modifications seront perdues."
   "Click OK to continue, or click Cancel to stay on this page": "Cliquez sur Ok pour continuer, ou Annuler pour rester sur cette page."
   "Remove entry?": "Supprimer l'entrée?"
   "Unrelate {{unrelate_model}} from {{unrelate_model_from}}?": "Dissocier {{unrelate_model}} de {{unrelate_model_from}}?"
   "Change {{attribute}}?": "Changer {{attribute}}?"
+  "Set language": "Changer la langue"
   "True": 
   "False": 
