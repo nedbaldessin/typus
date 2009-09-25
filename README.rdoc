@@ -47,7 +47,7 @@ Notes on the application demo:
 
 == Installing
 
-Install from GitHub the latest version which it's compatible with Rails 2.3.2.
+Install from GitHub the latest version which it's compatible with Rails 2.3.4.
 
     $ script/plugin install git://github.com/fesplugas/typus.git
 
@@ -72,56 +72,15 @@ Hire us to work on your next project. We build large and small websites.
 Contribute your patches to the community & support people on the 
 mailing list.
 
-Tell everybody about Typus, tell your friends and colleagues about 
-Typus and blog about Typus.
+Tell everybody about *Typus*, tell your friends and colleagues about 
+*Typus* and blog about *Typus*.
 
-== Fancyzoom for assets
+== Using Typus as a Gem?
 
-This feature is a work in progress. Only previews images.
+If you are using *Typus* as a gem add the following line at the end of the 
+<tt>Rakefile</tt> on the root of your Rails application.
 
-    # db/migrate/create_photos.rb
-
-    class CreatePhotos < ActiveRecord::Migration
-
-      def self.up
-        create_table :photos do |t|
-          t.string :asset_file_name
-          t.string :asset_content_type
-          t.integer :asset_file_size
-          t.datetime :asset_updated_at
-        end
-      end
-
-      def self.down
-        drop_table :photos
-      end
-
-    end
-
-    # app/models/photo.rb
-
-    class Photo < ActiveRecord::Base
-      has_attached_file :asset, :styles => { :typus => "692x461" }
-    end
-
-    # app/views/admin/photos/_index.html.erb
-
-    <%- content_for :javascripts do -%>
-
-      <%= javascript_include_tag 'admin/prototype' %>
-      <%= javascript_include_tag 'admin/scriptaculous' %>
-      <%= javascript_include_tag 'admin/fancyzoom' %>
-
-      <script type="text/javascript">
-        FancyZoomBox.directory = '/images/admin/fancyzoom';
-        $(document).observe('dom:loaded', function() {
-          <%- @items.each do |item| -%>
-            new FancyZoom('<%= item.to_dom %>');
-          <%- end -%>
-        });
-      </script>
-
-    <%- end -%>
+    Dir["#{RAILS_ROOT}/vendor/gems/*/**/tasks/**/*.rake"].sort.each { |ext| load ext }
 
 == Contributors
 
@@ -147,7 +106,9 @@ This feature is a work in progress. Only previews images.
 == Acknowledgments
 
 - *Typus* uses "Paginator" by Bruce Williams http://codefluency.com.
-- *Typus* has been inspired by "Django Admin" http://www.djangoproject.com.
+- *Typus* has been inspired by "Django Admin" http://djangoproject.com.
+- *Typus* uses http://fancybox.net.
+- *Typus* uses UI icons from http://jqueryui.com.
 
 Copyright (c) 2007-2009 Francesc Esplugas Marti, released under the 
 MIT license

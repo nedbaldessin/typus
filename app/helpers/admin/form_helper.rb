@@ -12,15 +12,11 @@ module Admin::FormHelper
       html << '<ul>'
 
       fields.each do |key, value|
-        if template = @resource[:class].typus_template(key)
-          html << typus_template_field(key, template, options)
-          next
-        end
+
         html << case value
                 when :belongs_to  then typus_belongs_to_field(key)
-                when :selector    then typus_selector_field(key)
                 when :tree        then typus_tree_field(key)
-                when :boolean, :date, :datetime, :file, :password, :string, :text, :time, :tiny_mce
+                when :boolean, :date, :datetime, :file, :password, :selector, :string, :text, :time, :tiny_mce
                   typus_template_field(key, value.to_s, options)
                 else
                   typus_template_field(key, 'string', options)
@@ -65,29 +61,6 @@ module Admin::FormHelper
 
     end
 
-  end
-
-  def typus_selector_field(attribute)
-    returning(String.new) do |html|
-      options = []
-      @resource[:class].send(attribute).each do |option|
-        case option.kind_of?(Array)
-        when true
-          selected = (@item.send(attribute).to_s == option.last.to_s) ? 'selected' : ''
-          options << "<option #{selected} value=\"#{option.last}\">#{option.first}</option>"
-        else
-          selected = (@item.send(attribute).to_s == option.to_s) ? 'selected' : ''
-          options << "<option #{selected} value=\"#{option}\">#{option}</option>"
-        end
-      end
-      html << <<-HTML
-<li><label for="item_#{attribute}">#{@resource[:class].human_attribute_name(attribute)}</label>
-<select id="item_#{attribute}" #{attribute_disabled?(attribute) ? 'disabled="disabled"' : ''} name="item[#{attribute}]">
-<option value=""></option>
-#{options.join("\n")}
-</select></li>
-      HTML
-    end
   end
 
   def typus_tree_field(attribute, items = @resource[:class].roots, attribute_virtual = 'parent_id')
@@ -142,14 +115,40 @@ module Admin::FormHelper
                        :resource_id => @item.id, 
                        foreign_key => @item.id }
 
+      condition = if @resource[:class].typus_user_id? && !@current_user.is_root?
+                    @item.owned_by?(@current_user)
+                  else
+                    true
+                  end
+
+      if condition
+        add_new = <<-HTML
+  <small>#{link_to _("Add new"), link_options if @current_user.can_perform?(model_to_relate, 'create')}</small>
+        HTML
+      end
+
       html << <<-HTML
 <a name="#{field}"></a>
-<div class="box_relationships">
+<div class="box_relationships" id="#{model_to_relate_as_resource}">
   <h2>
   #{link_to model_to_relate.typus_human_name.pluralize, { :controller => "admin/#{model_to_relate_as_resource}", foreign_key => @item.id }, :title => _("{{model}} filtered by {{filtered_by}}", :model => model_to_relate.typus_human_name.pluralize, :filtered_by => @item.typus_name)}
-  <small>#{link_to _("Add new"), link_options if @current_user.can_perform?(model_to_relate, 'create')}</small>
+  #{add_new}
   </h2>
       HTML
+
+      ##
+      # It's a has_many relationship, so items that are already assigned to another
+      # entry are assigned to that entry.
+      #
+      items_to_relate = model_to_relate.find(:all, :conditions => ["#{foreign_key} is ?", nil])
+      if condition && !items_to_relate.empty?
+        html << <<-HTML
+  #{form_tag :action => 'relate', :id => @item.id}
+  #{hidden_field :related, :model, :value => model_to_relate}
+  <p>#{select :related, :id, items_to_relate.collect { |f| [f.typus_name, f.id] }.sort_by { |e| e.first } } &nbsp; #{submit_tag _("Add"), :class => 'button'}</p>
+  </form>
+        HTML
+      end
 
       conditions = if model_to_relate.typus_options_for(:only_user_items) && !@current_user.is_root?
                     { Typus.user_fk => @current_user }
@@ -195,9 +194,13 @@ module Admin::FormHelper
       reflection = @resource[:class].reflect_on_association(field.to_sym)
       association = reflection.macro
 
-      condition = !(@resource[:class].typus_user_id? && @current_user.id == @item.send(Typus.user_fk))
+      condition = if @resource[:class].typus_user_id? && !@current_user.is_root?
+                    @item.owned_by?(@current_user)
+                  else
+                    true
+                  end
 
-      unless condition
+      if condition
         add_new = <<-HTML
   <small>#{link_to _("Add new"), :controller => field, :action => 'new', :back_to => @back_to, :resource => @resource[:self], :resource_id => @item.id if @current_user.can_perform?(model_to_relate, 'create')}</small>
         HTML
@@ -205,21 +208,24 @@ module Admin::FormHelper
 
       html << <<-HTML
 <a name="#{field}"></a>
-<div class="box_relationships">
+<div class="box_relationships" id="#{model_to_relate_as_resource}">
   <h2>
   #{link_to model_to_relate.typus_human_name.pluralize, :controller => "admin/#{model_to_relate_as_resource}"}
   #{add_new}
   </h2>
       HTML
+
       items_to_relate = (model_to_relate.find(:all) - @item.send(field))
-      unless condition || items_to_relate.empty?
+
+      if condition && !items_to_relate.empty?
         html << <<-HTML
   #{form_tag :action => 'relate', :id => @item.id}
   #{hidden_field :related, :model, :value => model_to_relate}
-  <p>#{ select :related, :id, items_to_relate.collect { |f| [f.typus_name, f.id] }.sort_by { |e| e.first } } &nbsp; #{submit_tag _("Add"), :class => 'button'}</p>
+  <p>#{select :related, :id, items_to_relate.collect { |f| [f.typus_name, f.id] }.sort_by { |e| e.first } } &nbsp; #{submit_tag _("Add"), :class => 'button'}</p>
   </form>
         HTML
       end
+
       items = @resource[:class].find(params[:id]).send(field)
       unless items.empty?
         html << build_list(model_to_relate, 
@@ -277,7 +283,7 @@ module Admin::FormHelper
   end
 
   def typus_template_field(attribute, template, options = {})
-    template_name = File.join(Typus::Configuration.options[:templates_folder], template)
+    template_name = File.join('admin', 'templates', template)
     render :partial => template_name, 
            :locals => { :resource => @resource, :attribute => attribute, :options => options }
   end

@@ -7,12 +7,12 @@ module Typus
                       :config_folder => 'config/typus', 
                       :default_locale => :en, 
                       :email => 'admin@example.com', 
-                      :image_preview_size => 'typus', 
+                      :file_preview => :typus_preview, 
+                      :file_thumbnail => :typus_thumbnail, 
                       :recover_password => false, 
                       :relationship => 'typus_users', 
                       :root => 'admin', 
                       :ssl => false, 
-                      :templates_folder => 'admin/templates',
                       :user_class_name => 'TypusUser', 
                       :user_fk => 'typus_user_id' }
 

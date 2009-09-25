@@ -109,17 +109,37 @@ class Admin::MasterController < ApplicationController
   end
 
   def edit
+
     item_params = params.dup
     %w( action controller model model_id back_to id resource resource_id page ).each { |p| item_params.delete(p) }
+
     # We assign the params passed trough the url
     @item.attributes = item_params
+
+    # If we want to display only user items, we don't want the links previous and 
+    # next linking to records from other users.
+    conditions = if @resource[:class].typus_options_for(:only_user_items)
+                   { Typus.user_fk => @current_user.id }
+                 end
+
+    item_params.merge!(conditions || {})
     @previous, @next = @item.previous_and_next(item_params)
+
     select_template :edit
+
   end
 
   def show
 
-    @previous, @next = @item.previous_and_next
+    check_ownership_of_item and return if @resource[:class].typus_options_for(:only_user_items)
+
+    # If we want to display only user items, we don't want the links previous and 
+    # next linking to records from other users.
+    conditions = if @resource[:class].typus_options_for(:only_user_items)
+                   { Typus.user_fk => @current_user.id }
+                 end
+
+    @previous, @next = @item.previous_and_next(conditions || {})
 
     respond_to do |format|
       format.html { select_template :show }
@@ -193,7 +213,7 @@ class Admin::MasterController < ApplicationController
 
   ##
   # Relate a model object to another, this action is used only by the 
-  # has_and_belongs_to_many relationships.
+  # has_and_belongs_to_many and has_many relationships.
   #
   def relate
 
@@ -206,35 +226,33 @@ class Admin::MasterController < ApplicationController
                         :model_a => resource_class.typus_human_name, 
                         :model_b => @resource[:class].typus_human_name)
 
-    redirect_to :action => @resource[:class].typus_options_for(:default_action_on_item), 
-                :id => @item.id, 
-                :anchor => resource_tableized
+    redirect_to :back
 
   end
 
   ##
-  # Remove relationship between models.
+  # Remove relationship between models, this action never removes items!
   #
   def unrelate
 
     resource_class = params[:resource].classify.constantize
     resource = resource_class.find(params[:resource_id])
 
-    case params[:association]
-    when 'has_and_belongs_to_many'
-      @item.send(resource_class.table_name).delete(resource)
-      message = "{{model_a}} unrelated from {{model_b}}."
-    when 'has_many', 'has_one'
-      resource.destroy
-      message = "{{model_a}} removed from {{model_b}}."
+    if @resource[:class].
+       reflect_on_association(resource_class.table_name.singularize.to_sym).
+       try(:macro) == :has_one
+      attribute = resource_class.table_name.singularize
+      @item.update_attribute attribute, nil
+    else
+      attribute = resource_class.table_name
+      @item.send(attribute).delete(resource)
     end
 
-    flash[:success] = _(message, :model_a => resource_class.typus_human_name, :model_b => @resource[:class].typus_human_name)
+    flash[:success] = _("{{model_a}} unrelated from {{model_b}}.", 
+                        :model_a => resource_class.typus_human_name, 
+                        :model_b => @resource[:class].typus_human_name)
 
-    redirect_to :controller => @resource[:self], 
-                :action => @resource[:class].typus_options_for(:default_action_on_item), 
-                :id => @item.id, 
-                :anchor => resource_class.table_name
+    redirect_to :back
 
   end
 

@@ -1,19 +1,6 @@
-<%
-
-  attachment = attribute.split('_file_name').first
-
-  unless @item.send(attribute).blank?
-    item = @item.send(attachment)
-    preview = if @item.send("#{attachment}_content_type") =~ /^image\/.+/ && item.styles.member?(:typus_thumbnail)
-                image_tag item.url(:typus_thumbnail)
-              else
-                link_to @item.send(attribute), item.url
-              end
-  end
-
-%>
+<% attachment = attribute.split('_file_name').first %>
 
 <li><label for="item_<%= attribute %>"><%= _(attachment.humanize) %></label>
 <%= file_field :item, attachment, :disabled => attribute_disabled?(attribute) %>
-<%= preview %>
+<%= @item.typus_preview(attribute) unless @item.send(attribute).blank? %>
 </li>

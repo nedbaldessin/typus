@@ -167,11 +167,14 @@ module Typus
     def typus_order_by
 
       fields = typus_defaults_for(:order_by)
-      return "#{table_name}.id ASC" if fields.empty?
 
-      order = fields.map do |field|
-                (field.include?('-')) ? "#{table_name}.#{field.delete('-')} DESC" : "#{table_name}.#{field} ASC"
-              end.join(', ')
+      order = if fields.empty?
+                "#{table_name}.id ASC"
+              else
+                fields.map do |field|
+                  field.include?('-') ? "#{table_name}.#{field.delete('-')} DESC" : "#{table_name}.#{field} ASC"
+                end.join(', ')
+              end
 
       return order
 
@@ -200,16 +203,7 @@ module Typus
     # We are able to define how to display dates on Typus
     def typus_date_format(attribute = :default)
       date_format = Typus::Configuration.config[name]['fields']['options']['date_formats'][attribute.to_s].to_sym rescue nil
-      date_format = :db if date_format.nil?
-      return date_format
-    end
-
-    # We are able to define which template to use to render the attribute 
-    # within the form
-    def typus_template(attribute)
-      Typus::Configuration.config[name]['fields']['options']['templates'][attribute.to_s]
-    rescue
-      nil
+      return !date_format.nil? ? date_format : :db
     end
 
     def build_conditions(params)

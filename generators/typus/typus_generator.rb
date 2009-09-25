@@ -46,7 +46,7 @@ class TypusGenerator < Rails::Generator::Base
         model_columns = model.columns - reject_columns
 
         # Don't show `text` fields and timestamps in lists.
-        list = model_columns.reject { |c| c.sql_type == 'text' || %w( created_at updated_at ).include?(c.name) }.map(&:name)
+        list = model_columns.reject { |c| c.sql_type == 'text' || %w( id created_at updated_at ).include?(c.name) }.map(&:name)
         # Don't show timestamps in forms.
         form = model_columns.reject { |c| %w( id created_at updated_at ).include?(c.name) }.map(&:name)
         # Show all model columns in the show action.
@@ -100,20 +100,21 @@ class TypusGenerator < Rails::Generator::Base
       [ 'public/stylesheets/admin', 
         'public/javascripts/admin', 
         'public/images/admin', 
-        'public/images/admin/fancyzoom' ].each { |f| Dir.mkdir(f) unless File.directory?(f) }
+        'public/images/admin/fancybox' ].each { |f| Dir.mkdir(f) unless File.directory?(f) }
 
       [ 'public/stylesheets/admin/screen.css', 
         'public/stylesheets/admin/reset.css', 
+        'public/stylesheets/admin/jquery.fancybox.css', 
         'public/images/admin/ui-icons.png' ].each { |f| m.file f, f }
 
-      %w( application builder controls dragdrop effects fancyzoom prototype scriptaculous slider sound ).each do |f|
+      %w( application jquery-1.3.2.min jquery.fancybox-1.2.1.min ).each do |f|
         file = "public/javascripts/admin/#{f}.js"
         m.file file, file
       end
 
-      %w( bl bm br closebox ml mr tl tm tr ).each do |image|
-        file = "public/images/admin/fancyzoom/#{image}"
-        %w( gif png ).each { |e| m.file "#{file}.#{e}", "#{file}.#{e}" }
+      %w( closebox left progress right shadow_e shadow_n shadow_ne shadow_nw shadow_s shadow_se shadow_sw shadow_w title_left title_main title_right ).each do |image|
+        file = "public/images/admin/fancybox/fancy_#{image}.png"
+        m.file file, file
       end
 
       # Migration file

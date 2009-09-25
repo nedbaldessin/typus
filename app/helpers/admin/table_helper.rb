@@ -35,7 +35,7 @@ module Admin::TableHelper
 
         action = if model.typus_user_id? && !@current_user.is_root?
                    # If there's a typus_user_id column on the table and logged user is not root ...
-                   item.owned_by?(@current_user) ? 'edit' : 'show'
+                   item.owned_by?(@current_user) ? item.class.typus_options_for(:default_action_on_item) : 'show'
                  elsif !@current_user.can_perform?(model, 'edit')
                    'show'
                  else
@@ -71,7 +71,7 @@ module Admin::TableHelper
                                      :method => :delete if condition
         when 'edit'
           # If we are editing content, we can relate and unrelate always!
-          perform = link_to unrelate, { :action => 'unrelate', :id => params[:id], :association => association, :resource => model, :resource_id => item.id }, 
+          perform = link_to unrelate, { :action => 'unrelate', :id => params[:id], :resource => model, :resource_id => item.id }, 
                                         :title => _("Unrelate"), 
                                         :confirm => _("Unrelate {{unrelate_model}} from {{unrelate_model_from}}?", 
                                         :unrelate_model => model.typus_human_name, 
@@ -84,7 +84,7 @@ module Admin::TableHelper
           condition = if @resource[:class].typus_user_id? && !@current_user.is_root?
                         @item.owned_by?(@current_user)
                       end
-          perform = link_to unrelate, { :action => 'unrelate', :id => params[:id], :association => association, :resource => model, :resource_id => item.id }, 
+          perform = link_to unrelate, { :action => 'unrelate', :id => params[:id], :resource => model, :resource_id => item.id }, 
                                         :title => _("Unrelate"), 
                                         :confirm => _("Unrelate {{unrelate_model}} from {{unrelate_model_from}}?", 
                                         :unrelate_model => model.typus_human_name, 
@@ -167,20 +167,9 @@ module Admin::TableHelper
   end
 
   def typus_table_file_field(attribute, item, link_options = {})
-
-    attachment = attribute.split('_file_name').first
-
-    if item.send(attachment).styles.member?(:typus_preview) && item.send("#{attachment}_content_type") =~ /^image\/.+/
-      <<-HTML
-<td><a href="##{item.to_dom(:suffix => 'zoom')}" id="#{item.to_dom}" title="Click to preview">#{item.send(attribute)}</a></td>
-<div id=\"#{item.to_dom(:suffix => 'zoom')}\">#{item.typus_preview(attachment)}</div>
-      HTML
-    else
-      <<-HTML
-<td>#{link_to item.send(attribute), item.send(attachment).url}</td>
-      HTML
-    end
-
+    <<-HTML
+<td>#{item.typus_preview_on_table(attribute)}</td>
+    HTML
   end
 
   def typus_table_tree_field(attribute, item)
